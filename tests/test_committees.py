@@ -228,15 +228,27 @@ def test_parse_committee_meeting_protocols():
     assert os.path.getsize(valid_protocol["parts_file"]) == 2335
     assert os.path.getsize(valid_protocol["text_file"]) == 2306
 
-    # rtf and invalid doc - skipped
-    for skipped_protocol in [resource[1], resource[2]]:
-        assert_conforms_to_schema(schema, skipped_protocol)
-        assert skipped_protocol["parts_file"] == None
-        assert skipped_protocol["text_file"] == None
+    # rtf protocol - skipped
+    rtf_protocol = resource[1]
+    assert_conforms_to_schema(schema, rtf_protocol)
+    assert rtf_protocol["parts_file"] == None
+    assert rtf_protocol["text_file"] == None
+
+    # invalid doc
+    invalid_doc = resource[2]
+    assert_conforms_to_schema(schema, invalid_doc)
+    assert invalid_doc["parts_file"] == os.path.join(out_path, "5", "576879.csv")
+    assert invalid_doc["text_file"] == os.path.join(out_path, "5", "576879.txt")
+    assert os.path.exists(invalid_doc["parts_file"])
+    assert os.path.exists(invalid_doc["text_file"])
+    # TODO: change to the actual returned file size after parsing
+    assert os.path.getsize(invalid_doc["parts_file"]) == 999
+    assert os.path.getsize(invalid_doc["text_file"]) == 999
 
     # the datapackage contains only the valid files
     with open(os.path.join(out_path, "datapackage.json")) as f:
         datapackage = json.load(f)
         assert datapackage == {"name": "_",
                                "resources": [{'name': 'committee-meeting-protocols-parsed',
-                                              'path': ['1/2020275.csv', '1/2020275.txt']}]}
+                                              'path': ['1/2020275.csv', '1/2020275.txt',
+                                                       '5/576879.csv', '5/576879.txt']}]}
